@@ -1,18 +1,22 @@
-import React, { useState } from "react";
+// Sekarang di sini kita membutuhkan useEffect
+// Karena ingin fetch data pada saat awal Container ini dibuat
+import React, { useEffect, useState } from "react";
 
-import { Box, Button, TextField, Typography } from "@mui/material";
+// Sekarang karena kita ingin menggunakan image orang, kita bisa menggunakan Avatar
+import { Avatar, Box, Button, TextField, Typography } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
 
-// import selectors yang dibutuhkan di sini
 import { selectUser, selectCounter } from "../features/counter/sliceCounter.js";
-// import actions yang dibutuhkan di sini
+
 import {
   increment,
   decrement,
   reset,
   incrementSpec,
   decrementSpec,
+  // Sekarang kita juga akan import si userAsync di ini
+  userAsync,
 } from "../features/counter/sliceCounter.js";
 
 const CounterReduxContainer = () => {
@@ -24,30 +28,14 @@ const CounterReduxContainer = () => {
   const dispatcher = useDispatch();
 
   const buttonDecrementOnClickHandler = () => {
-    // Perhatikan di sini dispatcher tidak mempassing action seperti biasa lagi
-    // dispatcher({
-    //   type: "decrement",
-    // });
-
-    // Action di sini dipanggil seperti kita memanggil fungsi biasanya
     dispatcher(decrement());
   };
 
   const buttonResetOnClickHandler = () => {
-    // dispatcher({
-    //   type: "reset",
-    // });
-
-    // Perhatikan di sini dispatcher tidak mempassing action seperti biasa lagi
     dispatcher(reset());
   };
 
   const buttonIncrementOnClickHandler = () => {
-    // dispatcher({
-    //   type: "increment",
-    // });
-
-    // Perhatikan di sini dispatcher tidak mempassing action seperti biasa lagi
     dispatcher(increment());
   };
 
@@ -61,30 +49,23 @@ const CounterReduxContainer = () => {
   };
 
   const buttonDecrementByAmountOnClickHandler = () => {
-    // dispatcher({
-    //   type: "decrementSpec",
-    //   amount: currAmount,
-    // });
-
-    // Perhatikan di sini kita akan memanggil dispatcher
-    // untuk memanggil suatu action yang memiliki payload
-
-    // Karena tadi di dalam reducers incrementSpec
-    // Kita hanya -= action.payload
-    // maka di sini kita langsung passing payload angkanya saja
     dispatcher(decrementSpec(currAmount));
   };
 
   const buttonIncrementByAmountOnClickHandler = () => {
-    // Kita panggil dispatcher lagi !
-    // dispatcher({
-    //   type: "incrementSpec",
-    //   amount: currAmount,
-    // });
-
-    // Sama dengan yang di atas
     dispatcher(incrementSpec(currAmount));
   };
+
+  // Di sini kita akan menggunakan useEffect
+  useEffect(
+    () => {
+      // Kita akan memanggil si userAsync via dispatcher
+      dispatcher(userAsync(3));
+    },
+    // Karena hanya ingin dipanggil 1x saja, maka kita harus membuat
+    // dependency listnya kosongan saja
+    [dispatcher]
+  );
 
   return (
     <>
@@ -101,8 +82,17 @@ const CounterReduxContainer = () => {
           React Redux
         </Typography>
 
+        {/* Kita gunakan avatar di sini */}
+        <Avatar
+          src={username.avatar}
+          alt="avatar"
+          sx={{ width: 64, height: 64 }}
+        />
+
         <Typography variant="body1" component="div">
-          Nama User: {username}
+          {/* Di sini ada sedikit perubahan, karena username sekarang berbentuk object */}
+          {/* Untuk bisa mengambil namanya kita akan menggunakan username.first_name */}
+          Nama User: {username.first_name}
         </Typography>
 
         <Box sx={{ display: "flex", gap: 2 }}>

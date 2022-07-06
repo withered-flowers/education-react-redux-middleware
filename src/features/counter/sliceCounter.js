@@ -1,90 +1,118 @@
-// Kita akan import untuk pembuatan slicenya
-import { createSlice } from "@reduxjs/toolkit";
+// karena di sini kita butuh menggunakan axios, kita import axios
+import axios from "axios";
 
-// di sini kita akan set initial state
-// karena data kita sebelumnya ada 2 (user dan counter)
-// maka kita akan menggunakan Object
+// sekarang di sini kita juga harus menggunakan middleware Thunk
+// dengan menggunakan redux toolkit "createAsyncThunk"
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+
 const initialStateForCounter = { user: "Whoever", counter: 10000 };
 
-// di sinilah kita akan membuat slice-nya
+// Di sini kita akan membuat si "Thunk"-nya
+// Agar kita bisa membuat logic untuk async-nya
+// Nantinya bisa di-dispatch seperti layaknya action pada biasanya
+
+// Ceritanya di sini kita akan mengambil data user by id dari sebuah API
+// dengan nama reqres.in (GET https://reqres.in/api/users/{id})
+
+// Ingat, karena ini nanti akan diimport, kita harus export di sini yah
+// (langsung export, tanpa ada embel embel .actions atau .reducers)
+export const userAsync = createAsyncThunk(
+  // parameter pertama adalah "prefix" yang akan digunakan
+  // "prefix" ini nantinya akan men-generate beberapa constant, yang akan
+  // merepresentasikan siklus hidup (lifecycle) dari sebuah request async:
+  // - "prefix"/pending
+  // - "prefix"/fulfilled
+  // - "prefix"/rejected
+  // (Mirip dengan kondisi pada Promise)
+  "counterRTK/fetchUser",
+  // Parameter kedua adalah pembuat Payloadnya (fnHandler), umumnya bersifat async
+  async (id) => {
+    // di dalam sinilah kita akan menggunakan si axios
+    const response = await axios.get(`https://reqres.in/api/users/${id}`);
+
+    // Di dalam fnHandler ini, HARUS ada return
+    // dimana return ini akan menjadi data yang dikembalikan PADA SAAT
+    // kondisi berhasil terjadi
+
+    // Dalam kasus ini kita mengembalikan si ... response.data.data
+    // (ingat Response schema axios, response data axios ada di response.data
+    //   dan data dari reqres.in ada di object data, sehingga jadinya response.data.data
+    return response.data.data;
+  }
+);
+
+// Selanjutnya kita akan memodifikasi slice di sini untuk bisa menggunakan userAsync tersebut
 const counterRTKSlice = createSlice({
-  // pertama tama kita akan berikan nama untuk slicenya terlebih dahulu
-  // ini akan digunakan untuk penamaan dalam internal redux toolkit
-  // hati hati dalam penulisan namanya
   name: "counterRTK",
-  // di sini kita akan menuliskan apakah initial state yang ada di dalam slice ini
   initialState: initialStateForCounter,
-  // selanjutnya kita akan menuliskan fungsi reducernya
-  // ada reducer apa sajakah di sini?
   reducers: {
-    // Masih ingat aksi kita sebelumnya ada apa saja?
-    // increment, decrement, reset, incrementSpec, dan decrementSpec
-    // kita akan membuatnya di sini !
-
-    // untuk setiap fungsi reducer yang ada di dalam reducers ini
-    // bisa menerima minimal 1 parameter, maksimal 2 parameter
-    // parameter 1 adalah "state" yang berubah
-    // parameter 2 adalah "action" (optional) yang bisa menerima data tambahan (payload)-nya
-
-    // untuk increment ini kita hanya butuh "state" aja
     increment(state) {
-      // ingat, kalau di dalam reducer,
-      // state itu sifatnya sudah "immutable"
-      // jadi setiap kali kita menggunakan reducer
-      // maka harus return data baru
-
-      // TAPI itu kalau kita menggunakan reducer !
-
-      // di dalam redux-toolkit, di balik layarnya, semua state sudah
-      // dibungkus dengan sebuah package yang bernama "immer"
-
-      // sehingga kita bisa menuliskan state SEOLAH-OLAH seperti mutable !
       state.counter += 1;
     },
-    // mari kita buat untuk decrement di sini
     decrement(state) {
-      // sama dengan di atas
       state.counter -= 1;
     },
-    // mari kita buat untuk reset di sini
     reset(state) {
-      // Ingat, di sini walaupun immutable tapi karena menggunakan "immer"
-      // seolah olah jadi mutable !
       state.counter = 0;
     },
-    // mari kita buat untuk incrementSpec di sini
     incrementSpec(state, action) {
-      // nah ini ada sedikit perbedaan dengan redux
-      // kalau pada redux, action memiliki payloadnya itu bebas penamaannya apa saja
-      // (pada sebelumnya kita menggunakan namanya adalah "amount")
-      // Pada redux toolkit, action memiliki payloadnya dengan nama "payload" saja
-      // (Bila payload ada banyak, bentuknya boleh object)
       state.counter += action.payload;
     },
-    // mari kita buat untuk decrementSpec di sini
     decrementSpec(state, action) {
-      // sama dengan di atas
       state.counter -= action.payload;
     },
   },
+  // Untuk bisa menggunakan actions yang dibuat oleh createAsyncThunk
+  // Kita tidak menggunakan property "reducers" di atas lagi,
+  // melainkan menggunakan property "extraReducers"
+
+  // extraReducers menerima sebuah function yang memiliki 1 parameter: Builder
+  extraReducers: (builder) => {
+    // kita di sini akan menggunakan builder untuk membuat case dari "Promise" yang akan terjadi
+    // pending / fulfilled / rejected
+    builder
+      // addCase ini akan menerima dua parameter:
+      // - parameter 1 adalah nama dari case-nya (didapat dari userAsync)
+      // - parameter 2 adalah handler nya (fungsi yang akan dijalankan ketika case terjadi)
+      .addCase(
+        // Nah di sini kita akan menggunakan case yang sudah ada dari si createAsyncThunk (userAsync)
+        userAsync.pending,
+        // Di sini kita akan membuat handler untuk case pending
+        // Mirip dengan reducer, menerima max 2 parameter
+        // parameter 1: state (data yang sekiranya ingin diubah)
+        // parameter 2: action (yang memiliki payload)
+
+        // misal pada kasus ini kita hanya ingin menuliskan loading... saja di console log
+        // tidak perlu kedua parameter tersebut
+        () => {
+          console.log("Loading ...");
+        }
+      )
+      .addCase(
+        // Kita tambahkan case lagi untuk fulfilled
+        userAsync.fulfilled,
+        // Di sini untuk handler kita membutuhkan 2 parameter
+        (state, action) => {
+          // Kita akan set state dari user-nya
+          // Lihat initialStateForCounter untuk lebih detilnya ada state apa saja
+          state.user = action.payload; // kita ambil dari action.payload, mirip reducer di atas
+        }
+      )
+      .addCase(
+        // Kita tambahkan case lagi untuk rejected
+        userAsync.rejected,
+        () => {
+          // misalnya kita tidak membutuhkan apapun
+          console.log("Fail to get user data");
+        }
+      );
+  },
 });
 
-// --- ACTION ---
-// Actionnya ini terbuat secara otomatis
-// dan dapat digunakan di tempat lain
 export const { increment, decrement, reset, incrementSpec, decrementSpec } =
   counterRTKSlice.actions;
 
-// --- SELECTOR ---
-// Selectornya dapat dibuat di sini
-// agar lebih terlihat rapih
-// dan kode menjadi lebih re-usable
-
-// Perhatikan di sini kita menggunakan nama "counterRTK" yah,
-// ini didefinisikan dari src/app/store.js
 export const selectUser = (state) => state.counterRTK.user;
 export const selectCounter = (state) => state.counterRTK.counter;
 
-// --- REDUCER ---
-// terakhir, kita akan export default si reducernya
 export default counterRTKSlice.reducer;
