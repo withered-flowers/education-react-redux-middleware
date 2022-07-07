@@ -1,8 +1,5 @@
-// Sekarang di sini kita membutuhkan useEffect
-// Karena ingin fetch data pada saat awal Container ini dibuat
 import React, { useEffect, useState } from "react";
 
-// Sekarang karena kita ingin menggunakan image orang, kita bisa menggunakan Avatar
 import { Avatar, Box, Button, TextField, Typography } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -15,12 +12,13 @@ import {
   reset,
   incrementSpec,
   decrementSpec,
-  // Sekarang kita juga akan import si userAsync di ini
   userAsync,
 } from "../features/counter/sliceCounter.js";
 
 const CounterReduxContainer = () => {
   const [currAmount, setCurrAmount] = useState(0);
+  // Kita akan menambah state yang baru untuk menampung input dari TextField
+  const [userId, setUserId] = useState(0);
 
   const username = useSelector(selectUser);
   const counter = useSelector(selectCounter);
@@ -39,13 +37,28 @@ const CounterReduxContainer = () => {
     dispatcher(increment());
   };
 
-  // Fungsi yang dibutuhkan untuk part 2
   const textFieldAmountOnChangeHandler = (e) => {
     const amountFromField = isNaN(parseInt(e.target.value))
       ? 0
       : parseInt(e.target.value);
 
     setCurrAmount(amountFromField);
+  };
+
+  // Kita tambahkan sebuah method untuk handle onChange TextField UserId
+  const textFieldUserIdOnChangeHandler = (e) => {
+    // Karena ingin ambil angka, kita parseInt untuk jaga-jaga
+    const valueUserId = isNaN(parseInt(e.target.value))
+      ? 0
+      : parseInt(e.target.value);
+
+    setUserId(valueUserId);
+  };
+
+  // Kita tambahkan sebuah method untuk handle onClick Button fetch user
+  const buttonFetchUserOnClickHandler = () => {
+    // Kita dispatch lagi si userAsync
+    dispatcher(userAsync(userId));
   };
 
   const buttonDecrementByAmountOnClickHandler = () => {
@@ -56,16 +69,9 @@ const CounterReduxContainer = () => {
     dispatcher(incrementSpec(currAmount));
   };
 
-  // Di sini kita akan menggunakan useEffect
-  useEffect(
-    () => {
-      // Kita akan memanggil si userAsync via dispatcher
-      dispatcher(userAsync(3));
-    },
-    // Karena hanya ingin dipanggil 1x saja, maka kita harus membuat
-    // dependency listnya kosongan saja
-    [dispatcher]
-  );
+  useEffect(() => {
+    dispatcher(userAsync(3));
+  }, [dispatcher]);
 
   return (
     <>
@@ -82,7 +88,6 @@ const CounterReduxContainer = () => {
           React Redux
         </Typography>
 
-        {/* Kita gunakan avatar di sini */}
         <Avatar
           src={username.avatar}
           alt="avatar"
@@ -90,10 +95,28 @@ const CounterReduxContainer = () => {
         />
 
         <Typography variant="body1" component="div">
-          {/* Di sini ada sedikit perubahan, karena username sekarang berbentuk object */}
-          {/* Untuk bisa mengambil namanya kita akan menggunakan username.first_name */}
           Nama User: {username.first_name}
         </Typography>
+
+        {/* Di sini kita akan membuat box baru untuk input dan button */}
+        <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
+          {/* Input */}
+          <TextField
+            label="Input User Id"
+            value={userId}
+            size="small"
+            type="number"
+            onChange={textFieldUserIdOnChangeHandler}
+          />
+          {/* Button */}
+          <Button
+            variant="outlined"
+            color="success"
+            onClick={buttonFetchUserOnClickHandler}
+          >
+            Fetch user
+          </Button>
+        </Box>
 
         <Box sx={{ display: "flex", gap: 2 }}>
           <TextField
@@ -129,7 +152,6 @@ const CounterReduxContainer = () => {
           </Button>
         </Box>
 
-        {/* Mari kita tambahkan Bagian baru di sini */}
         <Box sx={{ display: "flex", gap: 2 }}>
           <TextField
             label="amount"
