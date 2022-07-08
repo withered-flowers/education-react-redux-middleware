@@ -1,27 +1,28 @@
-// Dengan menggunakan redux toolkit kita akan import configureStore
-// configureStore ini adalah createStore pada redux ditambahkan dengan middleware Thunk
-// (Thunk akan dipelajari pada pembahasan selanjutnya)
 import { configureStore } from "@reduxjs/toolkit";
 
-// import seluruh reducer yang akan kita gunakan di sini
-// import { initialValue, rootReducer } from "../reducers/rootReducer";
-
-// import slice yang baru saja dibuat
 import counterSlice from "../features/counter/sliceCounter.js";
+// import service yang dibutuhkan
+import { reqresinColorAPI } from "../services/reqresinColorAPI.js";
 
-// di sini kita akan membuat store-nya
 export const store = configureStore({
-  // --- CARA 1: Dengan cara redux ---
-  // Di sini karena kita hanya ingin menggunakan satu reducer saja, maka kita
-  // lemparkan rootReducer saja, apabila ingin banyak, bisa menggunakan object
-  // dan secara otomatis akan digabungkan !
-  // reducer: rootReducer,
-  // Anggap ini ini adalah initial state dari seluruh reducer yang ada
-  // preloadedState: initialValue,
-
-  // --- CARA 2: Dengan cara redux-toolkit ---
-  // Kita gunakan import slice yang dibuat
   reducer: {
     counterRTK: counterSlice,
+    // Di sini kita akan menambahkan reducerPathnya ke dalam sini
+    // perhatikan di sini menggunakan "array", karena di dalam object tidak bisa menggunakan "dot"
+
+    // Perasaan kita ga buat reducer yah?
+    // Yes, dibuatkan SECARA OTOMATIS pada saat kita menggunakan createApi
+    [reqresinColorAPI.reducerPath]: reqresinColorAPI.reducer,
+  },
+  // Misalnya ini untuk tingkat lanjut, ingin menggunakan caching, invalidation (untuk refresh data),
+  // ataupun untuk polling datanya
+  // bisa menggunakan middleware
+
+  // menerima sebuah fungsi yang menerima parameter getDefaultMiddleware (sebuah fungsi juga)
+  middleware: (getDefaultMiddleware) => {
+    // Di sini kita akan menggabungkan middleware dari reqresinColorAPI ke default middlewarenya
+    // Kapan kita bikinnya yah? Lagi lagi, dibuatkan secara otomatis pada saat kita mendefinisikan
+    // dalam createApi di service (wuoah......)
+    getDefaultMiddleware().concat(reqresinColorAPI.middleware);
   },
 });
