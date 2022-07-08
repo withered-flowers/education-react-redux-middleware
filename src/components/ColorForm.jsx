@@ -58,6 +58,9 @@ const ColorForm = () => {
   // Di sini kita akan membuat onClick-nya
   const buttonAddColorOnClickHandler = (event) => {
     // Di sini kita akan memanggil query
+    // Ingat bahwa addColor di sini adalah "trigger" / "dispatcher" nya
+    // Pada addColor query-nya menerima "color" dalam bentuk object, sehingga di sini
+    // kita berikan state colorData (yang notabene juga merupakan object)
     addColor(colorData);
   };
 
