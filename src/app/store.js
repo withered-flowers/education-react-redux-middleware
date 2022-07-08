@@ -23,6 +23,6 @@ export const store = configureStore({
     // Di sini kita akan menggabungkan middleware dari reqresinColorAPI ke default middlewarenya
     // Kapan kita bikinnya yah? Lagi lagi, dibuatkan secara otomatis pada saat kita mendefinisikan
     // dalam createApi di service (wuoah......)
-    getDefaultMiddleware().concat(reqresinColorAPI.middleware);
+    return getDefaultMiddleware().concat(reqresinColorAPI.middleware);
   },
 });

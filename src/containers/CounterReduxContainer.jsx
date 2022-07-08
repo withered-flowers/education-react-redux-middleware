@@ -15,9 +15,11 @@ import {
   userAsync,
 } from "../features/counter/sliceCounter.js";
 
+// Import component yang tadi dibuat
+import ColorList from "../components/ColorList.jsx";
+
 const CounterReduxContainer = () => {
   const [currAmount, setCurrAmount] = useState(0);
-  // Kita akan menambah state yang baru untuk menampung input dari TextField
   const [userId, setUserId] = useState(0);
 
   const username = useSelector(selectUser);
@@ -45,9 +47,7 @@ const CounterReduxContainer = () => {
     setCurrAmount(amountFromField);
   };
 
-  // Kita tambahkan sebuah method untuk handle onChange TextField UserId
   const textFieldUserIdOnChangeHandler = (e) => {
-    // Karena ingin ambil angka, kita parseInt untuk jaga-jaga
     const valueUserId = isNaN(parseInt(e.target.value))
       ? 0
       : parseInt(e.target.value);
@@ -55,9 +55,7 @@ const CounterReduxContainer = () => {
     setUserId(valueUserId);
   };
 
-  // Kita tambahkan sebuah method untuk handle onClick Button fetch user
   const buttonFetchUserOnClickHandler = () => {
-    // Kita dispatch lagi si userAsync
     dispatcher(userAsync(userId));
   };
 
@@ -98,9 +96,7 @@ const CounterReduxContainer = () => {
           Nama User: {username.first_name}
         </Typography>
 
-        {/* Di sini kita akan membuat box baru untuk input dan button */}
         <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
-          {/* Input */}
           <TextField
             label="Input User Id"
             value={userId}
@@ -108,7 +104,6 @@ const CounterReduxContainer = () => {
             type="number"
             onChange={textFieldUserIdOnChangeHandler}
           />
-          {/* Button */}
           <Button
             variant="outlined"
             color="success"
@@ -174,6 +169,9 @@ const CounterReduxContainer = () => {
             + Amount
           </Button>
         </Box>
+
+        {/* Kita taruh componentnya di sini */}
+        <ColorList />
       </Box>
     </>
   );

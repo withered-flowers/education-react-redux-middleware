@@ -7,7 +7,7 @@ import { Box, Typography } from "@mui/material";
 const ColorItem = ({ colorItem }) => {
   return (
     <>
-      <Box key={item.id} sx={{ color: colorItem.color }}>
+      <Box key={colorItem.id} sx={{ color: colorItem.color }}>
         <Typography variant="body1">{colorItem.name}</Typography>
       </Box>
     </>
