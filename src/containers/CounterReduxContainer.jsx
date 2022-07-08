@@ -15,8 +15,9 @@ import {
   userAsync,
 } from "../features/counter/sliceCounter.js";
 
-// Import component yang tadi dibuat
 import ColorList from "../components/ColorList.jsx";
+// Import component yang tadi dibuat
+import ColorForm from "../components/ColorForm.jsx";
 
 const CounterReduxContainer = () => {
   const [currAmount, setCurrAmount] = useState(0);
@@ -170,8 +171,9 @@ const CounterReduxContainer = () => {
           </Button>
         </Box>
 
-        {/* Kita taruh componentnya di sini */}
         <ColorList />
+        {/* Kita taruh componentnya di sini */}
+        <ColorForm />
       </Box>
     </>
   );
