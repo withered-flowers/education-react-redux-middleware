@@ -1,5 +1,5 @@
-# Education React Redux
+# Education React Redux Middleware
 
-Pada pembelajaran ini kita akan belajar menggunakan useReducer (review) dan menggunakan redux-toolkit
+Pada pembelajaran ini kita akan belajar menggunakan Redux Toolkit dan RTK Query.
 
 Cukup panjang, jadi siapkan diri yah !
